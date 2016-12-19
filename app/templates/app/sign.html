@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+{% load staticfiles %}
+    <body background = "{% static 'login4.png' %}">
+        <div id = "container">
+            <h3 class = "lobster_two"> SIGN UP </h3>
+            <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+                <div class="left">
+                    <div class = "col-xs-4 bottom">
+                        login
+                    </div>
+                    <div class = "col-xs-8 bottom">
+                       {{ userform.username }}
+                    </div>
+                    <div class="col-xs-12">
+                        {% if userform.username.errors %}
+                            {% for errorU in userform.username.errors %}
+                                <div class = "alert alert-danger fade in">{{ errorU|escape }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class = "col-xs-4 bottom">
+                        password
+                    </div>
+                    <div class = "col-xs-6 bottom no_pad">
+                        {{ userform.password }}
+                    </div>
+                    <div class="col-xs-12">
+                        {% if userform.password.errors %}
+                            {% for errorP in userform.password.errors %}
+                                <div class = "alert alert-danger fade in">{{ errorP|escape }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class = "col-xs-4 bottom">
+                        email
+                    </div>
+                    <div class = "col-xs-8 bottom">
+                       {{ userform.email }}
+                    </div>
+                    <div class="col-xs-12">
+                        {% if userform.email.errors %}
+                            {% for errorE in userform.email.errors %}
+                                <div class = "alert alert-danger fade in">{{ errorE|escape }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <button class="btn btn-lg btn-primary btn-all top bottom" id = "login_button" type = "submit"> Sign in </button>
+                    <input type="hidden" name="next" value="{% url 'my site' %}" />
+                </div>
+            </form>
+        </div>
+    </body>
+{% endblock %}

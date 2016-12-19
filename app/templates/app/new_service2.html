@@ -1,0 +1,178 @@
+{% extends "base_analitic.html" %}
+{% block content %}
+{% load staticfiles %}
+
+<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/dark-hive/jquery-ui.css" id="theme">
+<link rel="stylesheet" href="{% static 'css/jquery.fileupload-ui.css' %}">
+<style>
+/* Adjust the jQuery UI widget font-size: */
+.ui-widget {
+    font-size: 0.95em;
+}
+.preview img {
+    max-height:50px;
+}
+</style>
+<script>
+    $(document).ready(function () {    
+        toggleTarget("New");
+    });
+    
+    function start() {
+        var list = document.getElementsByClassName("start");
+        for (var i = 0; i < list.length; i++) {
+            list[i].click();
+        }
+    }
+</script>
+
+<div id = "out"class="col-xs-9">
+    <div id = "in">
+        <p class = "lobster_two"> Create service </p>
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+                <div>
+                    <ul class="nav navbar-nav col-xs-12 down" data="New">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown"> 2/2</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="content left_d" id="New">
+            <form action="." method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="is_init" value="True">
+                <input type="hidden" name="service_name" value="{{service_name}}" />
+                <div id="fileupload">
+                    <div class="col-xs-3">
+                        <div class="well_c">
+                            1. upload init script
+                        </div>
+                    </div>
+                    <div class="col-xs-9 bottom">
+                        <div class="left_d well_c">
+                            <div class="fileupload-buttonbar">
+                                <div class="fileupload-buttons">
+                                    <div class="col-xs-4">
+                                        <span class="fileinput-button">
+                                            <span>Add file</span>
+                                            <input type="file" name="file" multiple>
+                                        </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-8">
+                                        <table role="presentation"><tbody class="files"></tbody></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <form action="." method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+        
+                <div id="fileupload2">
+                    <div class="col-xs-3">
+                        <div class="well_c">
+                            2. upload code
+                        </div>
+                    </div>
+                    <div class="col-xs-9">
+                        <div class="left well_c">
+                            <div class="fileupload-buttonbar">
+                                <div class="fileupload-buttons">
+                                    <!-- The fileinput-button span is used to style the file input field as button -->
+                                    <div class="col-xs-4">
+                                        <span class="fileinput-button">
+                                            <span>Add files...</span>
+                                            <input type="file" name="file" multiple>
+                                        </span>
+                                    </div>
+                                    <div class="col-xs-8">
+                                        <!-- The table listing the files available for upload/download -->
+                                        <table role="presentation"><tbody class="files"></tbody></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-10">
+                    <div class = "btn_center bottom_top">
+                        <input type="hidden" name="service_name" value="{{service_name}}" />
+                        <input class="btn btn-primary btn-md" name = "subm" type="submit" onclick="start()" value="Submit"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="{% static 'bootstrap/js/jquery.formset.js' %}"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script src="{% static 'js/tmpl.min.js' %}"></script>
+<script src="{% static 'js/jquery.iframe-transport.js' %}"></script>
+<script src="{% static 'js/jquery.fileupload.js' %}"></script>
+<script src="{% static 'js/jquery.fileupload-process.js' %}"></script>
+<script src="{% static 'js/jquery.fileupload-validate.js' %}"></script>
+<script src="{% static 'js/jquery.fileupload-ui.js' %}"></script>
+<script src="{% static 'js/jquery.fileupload-jquery-ui.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/csrf.js' %}"></script>
+{% verbatim %}
+    <!-- The template to display files available for upload -->
+    <script id="template-upload" type="text/x-tmpl">
+    {% for (var i=0, file; file=o.files[i]; i++) { %}
+        <tr class="template-upload fade" style="display:none">
+            <td>
+                <span class="preview"></span>
+            </td>
+            <td>
+                <p class="name">{%=file.name%}  </p>
+            </td>
+            <td>
+            {% if (!o.files.error && !i && !o.options.autoUpload) { %}
+                <button class="start hidden" name="init">Start</button>
+                
+            {% } %}
+            {% if (!i) { %}
+                <button class="left cancel">Cancel</button>
+            {% } %}
+            </td>
+        </tr>
+    {% } %}
+    </script>
+    <script id="template-upload2" type="text/x-tmpl">
+    {% for (var i=0, file; file=o.files[i]; i++) { %}
+        <tr class="template-upload fade" style="display:none">
+            <td>
+                <span class="preview"></span>
+            </td>
+            <td>
+                <p class="name">{%=file.name%}  </p>
+            </td>
+            <td>
+            {% if (!o.files.error && !i && !o.options.autoUpload) { %}
+                <button class="start hidden" name="code">Start</button>
+            {% } %}
+            {% if (!i) { %}
+                <button class="left cancel">Cancel</button>
+            {% } %}
+            </td>
+        </tr>
+    {% } %}
+    </script>
+    <!-- The template to display files available for download -->
+    <script id="template-download" type="text/x-tmpl">
+    {% for (var i=0, file; file=o.files[i]; i++) { %}
+        <tr class="template-download fade" style="display:none">
+        </tr>
+    {% } %}
+    </script>
+{% endverbatim %}
+{% endblock %}

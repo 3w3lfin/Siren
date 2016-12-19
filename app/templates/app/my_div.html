@@ -1,0 +1,43 @@
+{% load staticfiles %}
+{% load upload_tags %}
+
+<div class="table-responsive col-xs-12"> 
+    <table class="table">
+        <thead>
+            <tr>
+                <td> name </td>
+                <td> value </td>
+                <td> comment </td>
+            </tr>
+        </thead>
+        <tbody>
+        {% get_param_limit_formset param project_id as param_formset %}
+        {{ param_formset.management_form }}
+            {% for p_form in param_formset %}
+                {% if p_form.name.value != None%}
+                    {{ p_form.id }}
+                        <tr>
+                            <td>{{ p_form.name.value }}</td>
+                            {% if p_form.par_type.value == "F" %}
+                                <td> <div class="{{p.id}}_two">{{ p_form.file }}</div></td>
+                            {% else %}
+                                 <td> 
+                                     <div class="{{p.id}}_two">{{ p_form.value }}
+                                         {% if p_form.par_type.value == "N" %}
+                                            <a href="#" data-toggle="tooltip" title="[{{p_form.v_min.value}},{{p_form.v_max.value}}]"><span class="glyphicon info glyphicon-info-sign"></span></a>
+                                         {% endif %}
+                                    </div>
+                                 </td>
+                            {% endif %}
+                            <td>{{ p_form.comment.value }}</td>
+                        </tr>
+                        {% if p_form.key.errors %}
+                            {% for error in p_form.key.errors %}
+                                {{ error|escape }}
+                            {% endfor %}
+                        {% endif %}
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

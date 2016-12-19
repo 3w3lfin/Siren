@@ -1,0 +1,93 @@
+{% extends "base_analitic.html" %}
+{% block content %}
+{% load staticfiles %}
+<script>
+    $(document).ready(function () {    
+        toggleTarget("New");
+    });
+</script>
+<div id = "out"class="col-xs-9">
+    <div id = "in">
+        <p class = "lobster_two"> Create service </p>
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+                <div>
+                    <ul class="nav navbar-nav col-xs-12 down" data="New">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown"> 1/2</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="content left_d" id="New">
+            <form action="." method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div id="fileupload">
+                    <div class="col-xs-12">
+                        <div class="well_c">
+                            1. choose name
+                        </div>
+                    </div>
+                    <div class="col-xs-12">
+                        <div class="left">
+                                {{service_name.name}}
+                        </div>
+                    </div>
+                    <div class="col-xs-12 top">
+                        {% if service_name.name.errors %}
+                            {% for errorS in service_name.name.errors %}
+                                <div class = "alert alert-danger fade in">{{ errorS|escape }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                <!--<div class="col-xs-12">
+                    <div class="well_d">
+                        2. upload input files format <a href="#" data-toggle="tooltip" title="*.pdf, *ma.pdb"><span class="glyphicon info glyphicon-info-sign"></span></a>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="left bottom">
+                        {{ in_type.obj_in }}
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="well_d">
+                        3. upload output files format <a href="#" data-toggle="tooltip" title="*.pdf, *ma.pdb"><span class="glyphicon info glyphicon-info-sign"></span></a>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="left bottom">
+                        {{ out_type.obj_out }}
+                    </div>
+                </div>-->
+                <div class="col-xs-12">
+                    <div class="well_d">
+                        2. upload parameters <a href="#" data-toggle="tooltip" title="name; value; [var_min]; [var_max]; [comment]"><span class="glyphicon info glyphicon-info-sign"></span></a>
+                    </div>
+                </div>
+                <div class="col-xs-12">
+                    <div class="left bottom">
+                        {{ params.obj_param }}
+                    </div>
+                </div>
+                    <div class="col-xs-12">
+                        {% if params.obj_param.errors %}
+                            {% for errorP in params.obj_param.errors %}
+                                <div class = "alert alert-danger fade in">{{ errorP|escape }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                <div class="col-xs-10">
+                    <div class = "btn_center bottom">
+                        <input class="btn btn-primary btn-md" type="submit" name = "not_new"  value="Submit" />
+                    </div>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

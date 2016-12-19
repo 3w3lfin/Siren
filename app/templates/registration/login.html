@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+{% load staticfiles %}
+    {% if form.errors %}
+        <div class = "alert alert-danger fade in">
+            Your username and password didn't match. Please try again.
+        </div>
+    {% endif %}
+    <body background = "{% static 'login4.png' %}">
+        <div id = "container">
+            <h3 class = "lobster_two"> LOG IN </h3>
+                <form class = "form-signin" method = "post" action = "{% url 'django.contrib.auth.views.login' %}">
+                {% csrf_token %}
+                <div id = "tab">
+                    <div class = "login_tab">
+                        <div class="col-xs-3">
+                            {{ form.username.label }}
+                        </div>
+                        <div class="col-xs-3">
+                            {{ form.username}}
+                        </div>
+                    </div>
+                    <div class = "login_tab">
+                        <div class="col-xs-3">
+                            {{ form.password.label }}
+                        </div>
+                        <div class="col-xs-3">
+                            {{ form.password}}
+                        </div>
+                    </div>
+                </div>
+                <label>
+                    <input type = "checkbox" value = "remember-me"> Remember me
+                </label>
+                <button class = "btn btn-lg btn-primary btn-block" id = "login_button" type = "submit"> Sign in </button>
+                <input type="hidden" name="next" value="{% url 'my site' %}" />
+            </form>
+        </div>
+    </body>
+{% endblock %}

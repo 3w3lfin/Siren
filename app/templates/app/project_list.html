@@ -1,0 +1,17 @@
+{% extends "base_analitic.html" %}
+
+{% block content %}
+
+<h1>Project</h1>
+
+<ul>
+  {% for project in object_list %}
+    <li class="project"><a href="/app/show_project/{{ project.name }}/"> {{ project.name }}</a></li>
+        {% for file in project.file_set.all %}
+            <li class="file">{{ file.number }}</li>
+        {% endfor %}
+  {% endfor %}
+</ul>
+
+
+{% endblock %}

@@ -1,0 +1,387 @@
+{% extends "base_analitic.html" %}
+{% load staticfiles %}
+{% block content %}
+{% static "" as baseUrl %}
+{% load upload_tags %}
+<script>
+    $(document).ready(function () {    
+        toggleTarget("Plan");
+    });
+</script>
+<div id = "out" class="col-xs-9 rel">
+    <div id = "in" class="rel">
+        <p class = "lobster_two"> {{ project.name }} </p>
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+                <div>
+                    <ul class="nav navbar-nav down col-xs-2" data="About">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">About</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav down  col-xs-2" data="Plan">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Plan</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav down col-xs-2" data="Files">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Files</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav down col-xs-2" data="Share">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Share</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav down col-xs-2" data="Comments">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Comments</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav down col-xs-2" data="Module">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Module</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- About -->
+        <div class="content" id="About">
+            <br><br>
+            <div class="table-responsive left"> 
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td> name:  </td> <td>{{ project.name }}</td>
+                            <td> status: </td><td><div id = "stat">{{ status.get_status_display }}</div></td>
+                        </tr>
+                        <tr>
+                            <td> created: </td><td> {{ project.start_date }} </td>
+                            <td> ended: </td><td> {{ project.end_date|default_if_none:""  }} </td>
+                        </tr>
+                        <tr>
+                            <td> creator: </td><td> {{ creator.who }} </td>
+                            <td> </td><td></td>
+                        </tr>
+                        <tr>
+                            <td> STATISTICS: </td>
+                        </tr>
+                        <tr>
+                            <td> number of files: </td><td> {{ c_files }} </td>
+                        </tr>
+                        <tr>
+                            <td> number of days: </td><td> {{ c_days }} </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Comments -->
+        <div class="content" id="Comments">
+             {% for com in comments %}
+                {% if com.comment_add_by == user %}
+                    <div id = "div_{{com.id}}" class="containerR">
+                        <blockquote class="quote-boxR">
+                            <p class="quotation-mark"></p>
+                            <form enctype="multipart/form-data" method="post">
+                            {% csrf_token %}
+                                <p class="quote-text">
+                                    <div class= "add_comm {{com.id}}_one" data-catid="{{com.id}}">
+                                        <div class="file"  > {{ com.comment|linebreaks }} </div>
+                                    </div>
+                                </p>
+                                <hr>
+                                <div class="blog-post-actions">
+                                    <p class="blog-post-bottom pull-left">
+                                        {{ com.comment_add_by }} <br> {{ com.date }}
+                                    </p>
+                                </div>
+                            </form>
+                        </blockquote>
+                    </div>
+                {% else %}
+                    <div id = "div_{{com.id}}" class="containerL">
+                        <blockquote class="quote-boxL">
+                            <p class="quotation-mark"></p>
+                            <p class="quote-text">
+                                <div class= "add_comm" data-catid="{{com.id}}">
+                                    <div class="file"  > {{ com.comment|linebreaks }} </div>
+                                </div>
+                            </p>
+                            <hr>
+                            <div class="blog-post-actions">
+                                <p class="blog-post-bottom pull-left">
+                                    {{ com.comment_add_by }} <br> {{ com.date }} 
+                                </p>
+                              </div>
+                        </blockquote>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <hr>
+        </div>
+        <!-- Share -->
+        <div class="content" id="Share">
+            <div class="well_e">
+                <p>people who can see this project</p>
+            </div>
+            <div class="left">
+                 <div class="col-xs-4">
+                    <p class="cen">analysts</p>
+                    <div class="table-responsive"> 
+                        <table class="table">
+                            <tbody>
+                                {% for entry in can_see_a %}
+                                    <tr id="remove_{{entry.id}}">
+                                        <td class="file">
+                                            <a style="text-decoration: none; color : #333;" href="#" data-toggle="tooltip" title="{{ entry.who.user_name }} <img height='150' width='150' src='{% static entry.image %}' />">{{ entry.who.username }}</a></td>
+                                    </tr>
+                                {% endfor %}        
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <p class="cen">clients</p>
+                    <div class="table-responsive"> 
+                        <table class="table">
+                            <tbody>
+                                {% for entry_cl in clients %}
+                                    <tr id="remove_{{entry_cl.id}}">
+                                        <td class="file">
+                                            <a style="text-decoration: none; color : #333;" href="#" data-toggle="tooltip" title="{{ entry_cl.who.user_name }} <img  height='150' width='150' src='{% static entry_cl.image %}' />">{{ entry_cl.who.username }}</a></td>
+                                    </tr>
+                                {% endfor %}    
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <p class="cen">boss</p>
+                    <div class="table-responsive"> 
+                        <table class="table">
+                            <tbody>
+                                {% for entry_b in boss %}
+                                    <tr id="remove_{{entry_b.id}}">
+                                        <td class="file">
+                                            <a style="text-decoration: none; color : #333;" href="#" data-toggle="tooltip" title="<img height='150' width='150' src='{% static entry_b.image %}' />">{{ entry_b.who.username }}</a></td>
+                                    </tr>
+                                {% endfor %}  
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 well_e">
+                <p>people who can edit this project</p>
+            </div>
+            <div class="col-xs-4 left">
+                <p class="cen">analysts</p>
+                <div class="table-responsive"> 
+                    <table class="table">
+                        <tbody>
+                            {% for entryw in can_write_a %}
+                                <tr id="remove_{{entryw.id}}">
+                                    <td class="file">
+                                        <a style="text-decoration: none; color : #333;" href="#" data-toggle="tooltip" title="{{ entryw.who.user_name }} <img  height='150' width='150' src='{% static entryw.image %}' />">{{ entryw.who.username }}</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>       
+            </div>
+            <div class="col-xs-12 well_e">
+                <p>share this project</p>
+            </div>
+        </div>
+        <!--Plan-->
+        <div class="content rel" id="Plan">
+            <div class="col-xs-12 rel ">
+                <ol class="plan">
+                    {% get_plan_html plan as plan_html %}
+                    {{ plan_html | safe}}
+                </ol>
+            </div>
+            <div class="col-xs-12 rel"></div>
+        </div>
+        <!--Modules-->
+        <div class="content" Id="Module">
+            <div class = "left_min">
+                <div class="col-xs-12 top bottom" >
+                    {% for service in project_services %}
+                        <div class="panel panel-default top" id="service_{{service.id}}">
+                            <div class="panel-heading col-xs-12" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{ service.id }}">
+                                <div class="panel-heading col-xs-12" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{ i.id }}">
+                                    <div class="col-xs-8"><h4 class="panel-title"> {{ service.name }} </h4></div>
+                                </div>
+                            </div>
+                            <div id="collapse{{ service.id }}" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <div class="col-xs-12 top bottom"></div>
+                                    {% get_modules service project as show_modules %}
+                                    {% for show_module in show_modules %}
+                                        <div class="col-xs-12  panel panel-default no_right" id="show_module_{{show_module.id}}">
+                                            <div class="col-xs-12 panel-heading" data-toggle="collapse" data-parent="#accordion" data-target="#collapse_mod_{{ show_module.id }}">
+                                                <div class="col-xs-8"><h4 class="panel-title"> {{ show_module.name }} </h4></div>
+                                            </div>
+                                            <div id="collapse_mod_{{ show_module.id }}" class="col-xs-12 panel-collapse collapse">
+                                                <div class="panel-body">
+                                                   <div class = "well_e">
+                                                        {{ show_module.get_comm }}
+                                                    </div>
+                                                    <div class="table-responsive left"> 
+                                                        <table class="table">
+                                                            Code:
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td> init: </td>
+                                                                    <td> {{show_module.init.code_name}}  </td>
+                                                                    <td> <a href="#" data-toggle="modal" data-path="{{ show_module.init.path }}" data-target="{{ show_module.init.ext }}"> show code </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td> code: </td>
+                                                                </tr>
+                                                                {% for code_s in show_module.code.all %}
+                                                                    <td></td>
+                                                                    <td>{{code_s.code_name}}</td>
+                                                                    <td> <a href="#" data-toggle="modal" data-path="{{ code_s.path }}" data-target="{{ code_s.ext }}"> show code </td>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                        Parameters:
+                                                        <table class="table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <td> name </td>
+                                                                    <td> value </td>
+                                                                    <td> comment </td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for p in show_module.param.get_params %}
+                                                                    <tr id="tr_{{p.id}}">
+                                                                        <td> {{ p.name }} </td>
+                                                                        {% if p.par_type == "F" %}
+                                                                            <td> {{p.file.ad_name}} </td>
+                                                                        {% else %}
+                                                                            <td> {{ p.value }} </td>
+                                                                        {% endif %}
+                                                                        <td> {{ p.comment|default_if_none:"" }}</td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                        {% get_service show_module.id as analysis %}
+                                                        Run:
+                                                        <table class="table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <td> start </td>
+                                                                    <td> end </td>
+                                                                    <td> status </td>
+                                                                    <td></td>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for ana in analysis %}
+                                                                    <tr id="tr_{{ana.id}}">
+                                                                        <td> {{ ana.start_date }} </td>
+                                                                        <td> {{ana.end_date|default_if_none:""}} </td>
+                                                                        <td> {{ ana.status }} </td>
+                                                                        <td><a href="/app/show_analysis/{{ ana.id }}" >Show results</a></td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <!-- Files -->
+        {% load get_obj from upload_tags %}
+        <div class="content" id="Files">
+            <div class="panel-group" id="accordion">
+                <div class="panel-group left top" id="accordion">
+                    {% for file in files %}
+                        <div class="panel panel-default">
+                            <div class="panel-heading" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{ file.id }}">
+                                <h4 class="panel-title">
+                                    {{ file.ad_name }}
+                                </h4>
+                            </div>
+                            <div id="collapse{{ file.id }}" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <div class="table-responsive left"> 
+                                        <table class="table">
+                                            <tbody>
+                                                <tr>
+                                                    <td> client's name: </td>
+                                                    <td> {{file.cl_name}} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td> analyst's name: </td>
+                                                    <td> {{ file.ad_name }}{{ file.ext }} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>  added:  </td>
+                                                    <td> {{ file.user_add }} {{ file.date }} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>  
+                                                        <a href="#" data-toggle="modal" data-path="{{ file.path }}" data-target="{{ file.ext }}">
+                                                            show file 
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <a href="/app/show_file/{{ file.id }}"> go to file site </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div id="jpg" class="modal fade jpg png" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-body">
+                            <img src="" id="path" alt="" style="max-width:800px; max-height:800px;"> 
+                        </div>
+                    </div>
+                </div>
+                <div id=".pdf" class="modal fade pdf" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-body">
+                            <object id="data" height="950" data="" type="application/pdf" width="860">
+                                <p>It appears you don't have a PDF plugin for this browser.
+                                    You can <a href="sample-report.pdf">click here to
+                                    download the PDF file.</a>
+                                </p>
+                            </object>
+                        </div>
+                    </div>
+                </div>
+                <div id=".txt" class="modal fade txt" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-body">
+                            <iframe class = "frame" id = "frame" src=""></iframe>
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

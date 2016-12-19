@@ -1,0 +1,134 @@
+{% extends "base_analitic.html" %}
+{% block content %}
+{% load staticfiles %}
+<script type = "text/javascript" src="{% static 'bootstrap/js/dropzone.js' %}"></script>
+<script src="{% static 'js/siren-dropzone.js' %}"></script>
+<script>
+    $(document).ready(function () {    
+        toggleTarget("About");
+        document.getElementById("personal_img").src="{% static img.name %}";
+        $('.dz-image').click(function(){
+            $("#img_modal").modal();
+        });
+    });
+    function image_error() {
+        document.getElementById("personal_img").src="{% static 'icon-dna.png' %}";
+    }
+</script>
+<div id = "out" class="col-xs-9">
+    <div id = "in" onload = "image_load('{{ img.name }}')">
+        <p class = "lobster_two"> Hello {{ user }}! </p>
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+                <div>
+                    <ul class="nav navbar-nav col-xs-4 down" data="About">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">About</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav col-xs-4 down" data="Edit_inf">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Edit personal info</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav col-xs-4 down" data="Edit_img">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Change image</a>
+                        </li>
+                    </ul>
+           
+                </div>
+            </div>
+        </nav>
+        <!--About-->
+        <div class="content " id="About">
+            <div class="jumbotron">
+                <p> {{ user_ext.about|default_if_none:""|linebreaks}}</p>
+            </div>
+            <div class = "left">
+                <div class="col-xs-6 " >
+                    <div class="table-responsive"> 
+                        <table class="table bld">
+                            <tbody>
+                                <tr>
+                                    <td> name: </td> <td>{{ user_ext.first_name|default_if_none:"" }} {{ user_ext.last_name|default_if_none:"" }}</td>
+                                </tr>
+                                <tr>
+                                    <td> e-mail: </td><td>{{ user_ext.email|default_if_none:"" }}</td>
+                                </tr>
+                                <tr>
+                                    <td> company: </td><td> {{ user_ext.company|default_if_none:"" }}</td>
+                                </tr>
+                                <tr>
+                                    <td> department: </td><td> {{ user_ext.department|default_if_none:"" }} </td>
+                                </tr>
+                                <tr>
+                                    <td> tel: </td><td> {{ user_ext.tel|default_if_none:"" }} </td>
+                                </tr>
+                                <tr>
+                                    <td> cell phone: </td><td> {{ user_ext.cell|default_if_none:"" }} </td>
+                                </tr>
+                                <tr>
+                                    <td> date joined: </td><td> {{ user.date_joined|default_if_none:"" }} </td>
+                                </tr>
+                                <tr>
+                                    <td> last login: </td><td> {{ user.last_login|default_if_none:"" }} </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                     </div>
+                </div>
+                <div class="col-xs-6">
+                    <img src = " " id = "personal_img" onerror="image_error()" width="350" height="350">
+                </div>
+            </div>
+        </div>
+        <!--Edit info-->
+        <div class="content" id="Edit_inf">
+            <form enctype="multipart/form-data" method="post">
+            {% csrf_token %}
+                <div class = "col-xs-9 left">
+                    <div class="table-responsive top"> 
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td> name: </td> <td>{{ form_ext.first_name }} {{ form_ext.last_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td> e-mail: </td><td>{{ form_ext.email }}</td>
+                                </tr>
+                                <tr>
+                                    <td> company: </td><td> {{ form_ext.company }}</td>
+                                </tr>
+                                <tr>
+                                    <td> department: </td><td> {{ form_ext.department }} </td>
+                                </tr>
+                                <tr>
+                                    <td> tel: </td><td> {{ form_ext.tel }} </td>
+                                </tr>
+                                <tr>
+                                    <td> cell phone: </td><td> {{ form_ext.cell }} </td>
+                                </tr>
+                                <tr>
+                                    <td> about me: </td><td> {{ form_ext.about }} </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <input class="btn btn-primary btn-md bottom" name="edit_info" type="submit" value="Submit" />
+            </form>
+        </div>
+        <!--Edit image-->
+        <div class="content" id="Edit_img">
+            <div class="center" >                
+                <form id="fileupload" action="#" method="post" class ="dropzone" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <noscript><input type="hidden" name="redirect" value=""></noscript>
+                </form>
+                <button class="btn btn-primary btn-md bottom" id="submit-all"> Submit </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

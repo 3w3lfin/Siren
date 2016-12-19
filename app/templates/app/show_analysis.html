@@ -1,0 +1,69 @@
+{% extends "base_analitic.html" %}
+{% block content %}
+{% load staticfiles %}
+{% static "" as baseUrl %}
+{% load upload_tags %}
+<script>
+    $(document).ready(function () {   
+        toggleTarget("About");
+        $("#cont").load( "content_analysis.html", {csrfmiddlewaretoken: '{{ csrf_token }}'}, function() {});
+    });
+</script>
+
+<div id = "out"class="col-xs-9">
+    <div id = "in">
+        <p class = "lobster_two"> Analysis {{ analysis.module.name }} </p>
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+                <div>
+                    <ul class="nav navbar-nav col-xs-3 down" data="About">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">About</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav col-xs-3 down" data="Output">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Output files</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav col-xs-3 down" data="Conf">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Configure files</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav col-xs-3 down" data="Log">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Log files</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <form enctype="multipart/form-data" method="post">
+            {% csrf_token %}
+            <div id="cont"></div>
+        </form>
+    </div>
+</div>
+
+<script>
+    
+    var is_pending = '{{ is_pending }}';
+    var refreshIntervalId = '';
+    
+    $(document).ready(function () {
+        if (is_pending == "True") {refreshIntervalId = setInterval(reloadDiv, 10000);}
+    });
+
+    function reloadDiv() {
+        $("#cont").load( "content_analysis.html", {csrfmiddlewaretoken: '{{ csrf_token }}'}, function(response) {
+            var patt = /False/;
+            tmp = patt.test(response);  
+            if (tmp) {clearInterval(refreshIntervalId);}
+            
+        });
+    };
+
+</script>
+
+{% endblock %}

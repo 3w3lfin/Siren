@@ -1,0 +1,1130 @@
+{% extends "base_analitic.html" %}
+{% load staticfiles %}
+{% block content %}
+{% static "" as baseUrl %}
+{% load upload_tags %}
+
+<script src="{% static 'js/siren-project.js' %}"></script><script>
+    $(document).ready(function () {
+        var path = "{{ request.path }}";
+        var toggle = "Plan";
+        if(path.endsWith("Share/")){toggle = "Share"}
+        if(path.endsWith("Plan/")){toggle = "Plan"}
+        if(path.endsWith("Files/")){toggle = "Files"}
+        if(path.endsWith("Comments/")){toggle = "Comments"}
+        if(path.endsWith("Module/")){toggle = "Module"}
+        toggleTarget(toggle);
+    });
+</script>
+
+<script>
+    
+    function changeClassError(pl_id){
+        var target = document.getElementById(pl_id);
+        var str1 = "." + pl_id + "_plan1";
+        var str2 ="." + pl_id + "_plan2";
+        if (target.className === "panel no_pad col-xs-12 panel-primary") {
+            $.get('/app/show_project/{{ project.id }}', {command: "error_plan", plan_id: pl_id}, function(){
+                target.className = "panel no_pad col-xs-12 panel-danger";
+                $(str1).hide()
+                $(str2).show();
+            });
+        } else {
+            $.get('/app/show_project/{{ project.id }}', {command: "back_plan", plan_id: pl_id}, function(){
+                target.className = "panel no_pad col-xs-12 panel-primary";
+                $(str2).hide()
+                $(str1).show();
+            });
+        }
+    }  
+    
+    function removePlan(pl_id){
+        $.get('/app/show_project/{{ project.id }}', {command: "remove_plan", plan_id: pl_id}, function(){
+            var str1 = "#plan_" + pl_id;
+            $(str1).hide()
+        });
+    }  
+    
+    function changeClassOk(pl_id){
+        var target = document.getElementById(pl_id);
+        var str1 = "." + pl_id + "_plan1";
+        var str2 ="." + pl_id + "_plan2";
+        if (target.className === "panel no_pad col-xs-12 panel-primary") {
+            $.get('/app/show_project/{{ project.id }}', {command: "success_plan", plan_id: pl_id}, function(){
+                target.className = "panel no_pad col-xs-12 panel-success";
+                $(str1).hide()
+                $(str2).show();
+            });
+        } else {
+            $.get('/app/show_project/{{ project.id }}', {command: "back_plan", plan_id: pl_id}, function(){
+                target.className = "panel no_pad col-xs-12 panel-primary";
+                $(str2).hide()
+                $(str1).show();
+            });
+        }
+    }  
+
+    function show_params(source) {
+        var tr = source.parentNode;
+        try {
+             $("div").remove(".myclass");
+        }catch (e) {}
+        
+        var div = document.createElement("div");
+        div.setAttribute('class', 'myclass');
+        tr.appendChild(div);
+        param_id = source.value
+        if (param_id != "") {
+            $(".myclass").load( "my_div.html", { param_id: param_id}, function() {});
+        }
+    }
+    
+    function toggle(source) {
+        checkboxes = document.getElementsByName('stay');
+        if (checkboxes[0].checked) {
+            var t = false;
+        } else {
+            var t = true;
+        }
+    
+        for(var i=0, n=checkboxes.length; i<n; i++) {
+            checkboxes[i].checked = t;
+        }
+    }
+</script>
+
+<div id = "out" class="col-xs-9 rel">
+    <div id = "in" class="rel">
+        <p class = "lobster_two"> {{ project.name }} </p>
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+                <div>
+                    <ul class="nav navbar-nav down col-xs-1" data="About">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">About</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav down  col-xs-2" data="Plan">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Plan</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav down col-xs-2" data="Files">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Files</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav down col-xs-2" data="Share">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Share</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav down col-xs-2" data="Comments">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Comments</a>
+                        </li>
+                    </ul>
+                    <!--<ul class="nav navbar-nav down" data="Group">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Group</a>
+                        </li>
+                    </ul>-->
+                    <ul class="nav navbar-nav down col-xs-2" data="Module">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Module</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav down col-xs-1" data="Update">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown">Update</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- About -->
+        <div class="content" id="About">
+            <br><br>
+            <div class="table-responsive left"> 
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td> name:  </td> <td>{{ project.name }}</td>
+                            <td> status: </td><td><div id = "stat">{{ status.get_status_display }}</div></td>
+                        </tr>
+                        <tr>
+                            <td> created: </td><td> {{ project.start_date }} </td>
+                            <td> ended: </td><td> {{ project.end_date|default_if_none:""  }} </td>
+                        </tr>
+                        <tr>
+                            <td> creator: </td><td> {{ creator.who }} </td>
+                            <td> </td><td></td>
+                        </tr>
+                        <tr>
+                            <td> STATISTICS: </td>
+                        </tr>
+                        <tr>
+                            <td> number of files: </td><td> {{ c_files }} </td>
+                        </tr>
+                        <!--<tr>
+                            <td> number of groups: </td><td> {{ c_groups }} </td>
+                        </tr>-->
+                        <tr>
+                            <td> number of days: </td><td> {{ c_days }} </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!--<div class = "btn_l left_l">
+                {% if not project.end_date %}
+                    <button type="button" id = "finish" class="btn btn-primary btn-s" data-toggle="modal" data-target="#myModal">Finish project</button>       
+                {% endif %}
+            </div>
+        </div>
+         Modal 
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Finish project</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Project ended with</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default myBtn" id = "OK" data-dismiss="modal">Success</button>
+                        <button type="button" class="btn btn-default myBtn" id = "NOK" data-dismiss="modal">Failure</button>
+                        <button type="button" class="btn btn-default myBtn" id = "SUS" data-dismiss="modal">Suspended</button>
+                    </div>
+                </div>
+            </div>-->
+        </div>
+        <!-- Comments -->
+        <div class="content" id="Comments">
+             {% for com in comments %}
+                {% if com.comment_add_by == user %}
+                    <div id = "div_{{com.id}}" class="containerR">
+                        <blockquote class="quote-boxR">
+                            <p class="quotation-mark"></p>
+                            <form enctype="multipart/form-data" method="post">
+                            {% csrf_token %}
+                                <p class="quote-text">
+                                    <div class= "add_comm {{com.id}}_one" data-catid="{{com.id}}">
+                                        <div class="file"  > {{ com.comment|linebreaks }} </div>
+                                    </div>
+                                    {% get_pro_comment com as p_edit_form %}
+                                    <div class= "{{com.id}}_two" style="display: none;">
+                                        {{p_edit_form.comment}}
+                                    </div>
+                                </p>
+                                <hr>
+                                <div class="blog-post-actions">
+                                    <p class="blog-post-bottom pull-left">
+                                        {{ com.comment_add_by }} <br> {{ com.date }}
+                                    </p>
+                                    <p class="blog-post-bottom pull-right">
+                                        <button type="submit" value="{{com.id}}" name = "edit_pro_comm" class="{{com.id}}_two btn btn-primary btn-xs btn_left" style="display: none;">Save</button>
+                                    </p>
+                                </div>
+                            </form>
+                            <div class="blog-post-actions">
+                                <p class="blog-post-bottom pull-right">
+                                    {% if com.show %}
+                                        <button type="show_button" id = "{{com.id}}_hide" data-catid="{{com.id}}" data-project="{{project.id}}" class="btn btn-primary btn-xs show_button">Hide</button> 
+                                    {% else %}
+                                        <button type="show_button" id = "{{com.id}}_show" data-catid="{{com.id}}" data-project="{{project.id}}" class="btn btn-primary btn-xs show_button">Show</button> 
+                                    {% endif %}
+                                    <button type="button" value=".{{com.id}}_" class="btn btn-primary btn-xs editButton">Edit</button>
+                                    <button type="button" data-project="{{project.id}}" data-catid="{{com.id}}" class="{{com.id}}_one btn btn-primary btn-xs removeButton">Remove</button> 
+                                    </p>
+                                </div>
+                        </blockquote>
+                    </div>
+                {% else %}
+                    <div id = "div_{{com.id}}" class="containerL">
+                        <blockquote class="quote-boxL">
+                            <p class="quotation-mark"></p>
+                            <p class="quote-text">
+                                <div class= "add_comm" data-catid="{{com.id}}">
+                                    <div class="file"  > {{ com.comment|linebreaks }} </div>
+                                </div>
+                            </p>
+                            <hr>
+                            <div class="blog-post-actions">
+                                <p class="blog-post-bottom pull-left">
+                                    {{ com.comment_add_by }} <br> {{ com.date }} 
+                                </p>
+                              </div>
+                        </blockquote>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <hr>
+            <form enctype="multipart/form-data" method="post">
+                {% csrf_token %}
+                {{new_comment.comment}}
+                <p> Do you want to show this comment to others?{{new_comment.show}}</p>
+                <div class = "btn_center">
+                    <input class="btn btn-primary btn-md" type="submit" name = "add_comment" value="Submit" />
+                </div>
+                <br></br><br></br>
+            </form>
+        </div>
+        <!-- Share -->
+        <div class="content" id="Share">
+            <div class="well_e">
+                <p>people who can see this project</p>
+            </div>
+            <div class="left">
+                 <div class="col-xs-4">
+                    <p class="cen">analysts</p>
+                    <div class="table-responsive"> 
+                        <table class="table">
+                            <tbody>
+                                {% for entry in can_write_a %}
+                                    <tr id="remove_{{entry.id}}">
+                                        <td class="file">
+                                            <a style="text-decoration: none; color : #333;" href="#" data-toggle="tooltip" title="<div>{{ entry.who.user_name }}</div> <div>{{ entry.comment }}</div> <div><img height='150' width='150' src='{% static entry.image %}' /></div>">{{ entry.who.username }}</a></td>
+                                        <td><a class="remove" data-project="{{project.id}}" data-catid="{{entry.id}}">remove</td>
+                                    </tr>
+                                {% endfor %}        
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <p class="cen">clients</p>
+                    <div class="table-responsive"> 
+                        <table class="table">
+                            <tbody>
+                                {% for entry_cl in clients %}
+                                    <tr id="remove_{{entry_cl.id}}">
+                                        <td class="file">
+                                            <a style="text-decoration: none; color : #333;" href="#" data-toggle="tooltip" title="<div>{{ entry_cl.who.user_name }}</div> <div>{{ entry_cl.comment }}</div> <div><img  height='150' width='150' src='{% static entry_cl.image %}' /></div>">{{ entry_cl.who.username }}</a></td>
+                                        <td><a class="remove" data-project="{{project.id}}" data-catid="{{entry_cl.id}}">remove</td>
+                                    </tr>
+                                {% endfor %}    
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <p class="cen">boss</p>
+                    <div class="table-responsive"> 
+                        <table class="table">
+                            <tbody>
+                                {% for entry_b in boss %}
+                                    <tr id="remove_{{entry_b.id}}">
+                                        <td class="file">
+                                            <a style="text-decoration: none; color : #333;" href="#" data-toggle="tooltip" title="<div>{{ entry_b.who.user_name }}</div> <div>{{ entry_b.comment }}</div> <div><img height='150' width='150' src='{% static entry_b.image %}' /></div>">{{ entry_b.who.username }}</a></td>
+                                        <td><a class="remove" data-project="{{project.id}}" data-catid="{{entry_b.id}}">remove</td>
+                                    </tr>
+                                {% endfor %}  
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 well_e">
+                <p>share this project</p>
+            </div>
+            <div class="col-xs-9 left">
+                <form enctype="multipart/form-data" method="post">
+                    {% csrf_token %}
+                    <div id="myFormset1Table">
+                        {% load staticfiles %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <p>{{ message }}</p>
+                            {% endfor %}
+                        {% endif %}
+                            
+                        {{ link_formset.management_form }}
+
+                        {% for link_form in link_formset %}
+                            <div class="link_formset top">
+                                <div>
+                                    <tr>
+                                        <td>1. choose person</td>
+                                        <div class="left bottom">
+                                            <td>{{ link_form.who }}</td>
+                                        </div>
+                                    </tr>
+                                    {% if link_form.who.errors %}
+                                        {% for error in link_form.who.errors %}
+                                            {{ error|escape }}
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <tr>
+                                        <td>2. choose role</td>
+                                        <td>
+                                            <div class="left bottom">
+                                                {{ link_form.role }} 
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% if link_form.role.errors %}
+                                        {% for error in link_form.role.errors %}
+                                            {{ error|escape }}
+                                        {% endfor %}
+                                    {% endif %}
+                                <div>
+                                </div>
+                                    <tr>
+                                        <td>3. add comment (optional)</td>
+                                        <div class="left">
+                                            <td>{{ link_form.comment }}</td>
+                                        </div>
+                                    </tr>
+                                    {% if link_form.comment.errors %}
+                                        {% for error in link_form.comment.errors %}
+                                            {{ error|escape }}
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                        
+                        {% if link_formset.non_form_errors %}
+                            {% for error in link_formset.non_form_errors %}
+                                {{ error|escape }}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class = "btn_center">
+                        <input class="btn btn-primary btn-md" type="submit" name = "share" value="Submit" />
+                    </div>
+                    <br></br><br></br>
+                </form>
+            </div>
+        </div>
+        <!--Plan-->
+        <div class="content rel" id="Plan">
+            <div class="col-xs-12 rel ">
+                <ol class="plan">
+                    {% get_plan_html plan as plan_html %}
+                    {{ plan_html | safe}}
+                </ol>
+            </div>
+            <div class="col-xs-12 rel"></div>
+            <div class="col-xs-12">
+                <form enctype="multipart/form-data" method="post">
+                    {% csrf_token %}
+                    <div class="well_e">
+                        <p class="left">Add another point</p>
+                    </div>
+                    {{new_plan.comment}}
+                    <div class = "btn_center bottom top">
+                        <input class="btn btn-primary btn-md" type="submit" name = "update_plan" value="Submit" />
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!--Update-->
+        <div class="content rel top" id="Update">
+            <div class="col-md-4 left_l bottom top">
+                <ul class="nav nav-pills nav-stacked">
+                    <li class="vert_nav" data-show="pro_arch"><a>End project</a></li>
+                    <li class="vert_nav" data-show="pro_del"><a>Delete project</a></li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <div class="vert_content" style="display:none" id="pro_arch">
+                    <form enctype="multipart/form-data" method="post">
+                        {% csrf_token %}
+                        <div class="bottom">
+                            <div><h8>Are you sure you want to ARCHIVE this project?</h8></div>
+                            <div class="bottom"><h9>You won't be able to change this project but it won't be deleted from server.</h9></div>
+                            <div class="bottom"><h9>If YES choose how the project ended:</h9></div>
+                                <input type="submit" class="btn btn-primary btn-md" name = "pro_OK" value="Success"/>
+                                <input type="submit" class="btn btn-primary btn-md" name = "pro_NOK" value="Failure"/>
+                                <input type="submit" class="btn btn-primary btn-md" name = "pro_SUS" value="Suspended"/>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="vert_content" style="display:none" id="pro_del">
+                    <form enctype="multipart/form-data" method="post">
+                        {% csrf_token %}
+                        <div class="bottom">
+                            <div><h8>Are you sure you want to DELETE this project?</h8></div>
+                            <div class="bottom"><h9>All files will be deleted from server.</h9></div>
+                            <input type="submit" class="btn btn-primary btn-md" name = "pro_del" value="Yes" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!--Modules-->
+        <div class="content" Id="Module">
+            <div class = "left_min">
+                <div class="col-xs-12 top" >
+                    {% for service in project_services %}
+                        <div class="panel panel-default top" id="service_{{service.id}}">
+                            <div class="panel-heading col-xs-12" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{ service.id }}">
+                                <div class="panel-heading col-xs-12" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{ i.id }}">
+                                    <div class="col-xs-8"><h4 class="panel-title"> {{ service.name }} </h4></div>
+                                   <div class="col-xs-4"><a data-project="{{project.id}}" data-catid="{{service.id}}" class="no-collapsable removeService right">Remove</a></div>
+                                </div>
+                            </div>
+                            <form enctype="multipart/form-data" method="post">
+                                {% csrf_token %}
+                                <div id="collapse{{ service.id }}" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <div class="col-xs-12 top bottom"></div>
+                                        {% get_modules service project as show_modules %}
+                                        {% for show_module in show_modules %}
+                                            <div class="col-xs-12  panel panel-default no_right" id="show_module_{{show_module.id}}">
+                                                <div class="col-xs-12 panel-heading" data-toggle="collapse" data-parent="#accordion" data-target="#collapse_mod_{{ show_module.id }}">
+                                                    <div class="col-xs-8"><h4 class="panel-title"> {{ show_module.name }} </h4></div>
+                                                    <div class="col-xs-4"><a data-project="{{project.id}}" data-catid="{{show_module.id}}" class="no-collapsable removeModule right">Remove</a></div>
+                                                </div>
+                                                <div id="collapse_mod_{{ show_module.id }}" class="col-xs-12 panel-collapse collapse">
+                                                    <div class="panel-body">
+                                                       <div class = "well_e">
+                                                            {{ show_module.get_comm }}
+                                                        </div>
+                                                        <div class="table-responsive left"> 
+                                                            <table class="table">
+                                                                Code:
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td> init: </td>
+                                                                        <td> {{show_module.init.code_name}}  </td>
+                                                                        <td> <a href="#" data-toggle="modal" data-path="{{ show_module.init.path }}" data-target="{{ show_module.init.ext }}"> show code </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td> code: </td>
+                                                                    </tr>
+                                                                    {% for code_s in show_module.code.all %}
+                                                                        <td></td>
+                                                                        <td>{{code_s.code_name}}</td>
+                                                                        <td> <a href="#" data-toggle="modal" data-path="{{ code_s.path }}" data-target="{{ code_s.ext }}"> show code </td>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                            Parameters:
+                                                            <table class="table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <td> name </td>
+                                                                        <td> value </td>
+                                                                        <td> comment </td>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for p in show_module.param.get_params %}
+                                                                        <tr id="tr_{{p.id}}">
+                                                                            <td> {{ p.name }} </td>
+                                                                            {% if p.par_type == "F" %}
+                                                                                <td> {{p.file.ad_name}} </td>
+                                                                            {% else %}
+                                                                                <td> {{ p.value }} </td>
+                                                                            {% endif %}
+                                                                            <td> {{ p.comment|default_if_none:"" }}</td>
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                            {% get_service show_module.id as analysis %}
+                                                            Run:
+                                                            <table class="table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <td> start </td>
+                                                                        <td> end </td>
+                                                                        <td> status </td>
+                                                                        <td></td>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for ana in analysis %}
+                                                                        <tr id="tr_{{ana.id}}">
+                                                                            <td> {{ ana.start_date }} </td>
+                                                                            <td> {{ana.end_date|default_if_none:""}} </td>
+                                                                            <td> {{ ana.status }} </td>
+                                                                            <td><a href="/app/show_analysis/{{ ana.id }}" >Show results</a></td>
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                            <div class = "btn_center">
+                                                                <div class="col-xs-1"><button type="submit" class="btn btn-primary btn-md" value="{{show_module.id}}" name = "run_module">Run again</button></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                        
+                                        {% get_init_module_form service as new_module %}
+                                        <button type="button" class="bottom btn btn-info well_d" data-toggle="collapse" data-target="#new_mod{{service.id}}">Add new module</button>                                        
+                                        <div id="new_mod{{service.id}}" class="collapse">
+                                            <div class="well_d bottom left col-xs-12">
+                                                <div class="col-xs-2">
+                                                    module name: 
+                                                </div>
+                                                <div class="col-xs-9">
+                                                    {{new_module.name}}
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-12">
+                                                {% if module_form2.name.errors %}
+                                                    {% for errorN in module_form2.name.errors %}
+                                                        <div class = "alert alert-danger fade in">{{ errorN|escape }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                            <div class="well_d bottom left col-xs-12">
+                                                <div class="col-xs-2">
+                                                    comment:
+                                                </div>
+                                                <div class="col-xs-9">
+                                                    {{new_module_com.comment}}
+                                                </div>
+                                            </div>
+                                            <div class="well_d bottom left col-xs-12">
+                                                <div class="col-xs-2">
+                                                    init:
+                                                </div>
+                                                <div class="col-xs-3">
+                                                    {{new_module.init}} 
+                                                </div>
+                                                <div class="col-xs-2">
+                                                    code:
+                                                </div>
+                                                <div class="col-xs-3">
+                                                    {{new_module.code}} 
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-12">
+                                                <div class="col-xs-6">
+                                                    {% if module_form2.init.errors %}
+                                                        {% for errorI in module_form2.init.errors %}
+                                                            <div class = "alert alert-danger fade in">{{ errorI|escape }}</div>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-xs-6">
+                                                    {% if module_form2.code.errors %}
+                                                        {% for errorC in module_form2.code.errors %}
+                                                            <div class = "alert alert-danger fade in">{{ errorC|escape }}</div>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            {% get_param_module_form service as new_paramas %}
+                                            <div class="well_d bottom left col-xs-12">
+                                                <div class="col-xs-2">
+                                                    parameters:
+                                                </div>
+                                                <div class="col-xs-9 bottom" id="new_params{{service.id}}">
+                                                    {{new_paramas.param}} 
+                                                </div>
+                                            </div>
+                                                <div class="col-xs-12">
+                                                    {% if module_form2.code.errors %}
+                                                        {% for errorP in module_form2.code.errors %}
+                                                            <div class = "alert alert-danger fade in">{{ errorP|escape }}</div>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </div>
+                                            <div>
+                                                <button type="submit" class="btn btn-primary btn-md " value="{{service.id}}" name = "new_module">Save</button>
+                                                <button type="submit" class="btn btn-primary btn-md " value="{{service.id}}" name = "save_and_run">Save & Run</button>
+                                            </div>
+                                        </div> 
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+             <div class="col-md-3 left_l bottom top">
+                <ul class="nav nav-pills nav-stacked">
+                    <li class="vert_nav" data-show="add_ex"><a>Add existing service</a></li>
+                    <li class="vert_nav" data-show="add_new"><a>Add new service</a></li>
+                </ul>
+            </div>
+            <div class="col-md-7 top">
+                <div class="vert_content" style="display:none" id="add_ex">
+                    <form enctype="multipart/form-data" method="post">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-primary btn-md bottom" onclick="toggle(this)">check all</button>
+                        <input class="btn btn-primary btn-md bottom" type="submit" name = "new_services" value=" Add " />
+                        <div class="table-responsive"> 
+                            <table class="table">
+                                <tbody>
+                                    {% for ser in all_services %}
+                                       <tr>
+                                            {% for s in ser %}
+                                                <td>{{ s.name }} <input type="checkbox" class = "check" name="stay" value="{{s.id}}"></td>
+                                            {% endfor %}
+                                       </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Files -->
+        {% load get_obj from upload_tags %}
+        <div class="content" id="Files">
+            <div class="panel-group" id="accordion">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="panel-group left top" id="accordion">
+                        {% for file in files %}
+                            <div class="panel panel-default">
+                                <div class="panel-heading" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{ file.id }}">
+                                    <h4 class="panel-title">
+                                        {{ file.ad_name }}
+                                        <input class="right no-collapsable" type="checkbox" value="{{ file.id }}" name="choices">
+                                    </h4>
+                                </div>
+                                <div id="collapse{{ file.id }}" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <div class="table-responsive left"> 
+                                            <table class="table">
+                                                <tbody>
+                                                    <tr>
+                                                        <td> client name: </td>
+                                                        <td> {{file.cl_name}} </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td> analyst name: </td>
+                                                        <td> {{ file.ad_name }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>  added:  </td>
+                                                        <td> {{ file.user_add }} {{ file.date }} </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>  
+                                                            <a href="#" data-toggle="modal" data-path="{{ file.path }}" data-target="{{ file.ext }}">
+                                                                show file 
+                                                            </a>
+                                                        </td>
+                                                        <td>
+                                                            <a href="/app/show_file/{{ file.id }}"> go to file site </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div id="jpg" class="modal fade jpg png" role="dialog">
+                        <div class="modal-dialog">
+                            <div class="modal-body">
+                                <img src="" id="path" alt="" style="max-width:800px; max-height:800px;"> 
+                            </div>
+                        </div>
+                    </div>
+                    <div id=".pdf" class="modal fade pdf" role="dialog">
+                        <div class="modal-dialog">
+                            <div class="modal-body">
+                                <object id="data" height="950" data="" type="application/pdf" width="860">
+                                    <p>It appears you don't have a PDF plugin for this browser.
+                                        You can <a href="sample-report.pdf">click here to
+                                        download the PDF file.</a>
+                                    </p>
+                                </object>
+                            </div>
+                        </div>
+                    </div>
+                    <div id=".txt" class="modal fade txt" role="dialog">
+                        <div class="modal-dialog">
+                            <div class="modal-body">
+                                <iframe class = "frame" id = "frame" src=""></iframe>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="well_e">
+                        <p class="left">actions:</p>
+                    </div>
+                    <div class="col-md-3 left_l bottom">
+                        <ul class="nav nav-pills nav-stacked">
+                            <li class=" vert_nav" data-show="nav_add"><a>Add file</a></li>
+                            <li class=" vert_nav" data-show="nav_delete"><a>Remove from project</a></li>
+                            <li class=" vert_nav" data-show="nav_add_pro"><a>Add to project</a></li>
+                            <!--<li class=" vert_nav" data-show="nav_add_gr"><a>Add to group</a></li>-->
+                            <!--<li class=" vert_nav" data-show="nav_add_ext"><a>Add extention</a></li>-->
+                            <li class=" vert_nav" data-show="nav_add_com"><a>Add comment</a></li>
+                            <li class=" vert_nav" data-show="nav_share"><a>Share files</a></li>
+
+                        </ul>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="vert_content" style="display:none" id="nav_add">
+                            <h8>Upload file</h8>
+                            <div id="fileupload" class="top">
+                                <div class="fileupload-buttonbar">
+                                    <div class="fileupload-buttons">
+                                        <div class="btn-down">
+                                            <span class="fileinput-button fileinput-button2">
+                                                <i class="glyphicon glyphicon-plus"></i>
+                                                <span>Add file</span>
+                                                <input type="file" name="file" multiple>
+                                            </span>
+                                        </div>
+                                        <button type="submit" class="btn-down start btn"><i class="glyphicon glyphicon-upload"></i> Start upload</button>
+                                        <button type="reset" class="btn-down cancel"><i class="glyphicon glyphicon-remove"></i> Cancel upload</button>
+                                        <span class="fileupload-loading"></span>
+                                    </div>
+                                    <div class="fileupload-progress fade" style="display:none">
+                                        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+                                        <div class="progress-extended">&nbsp;</div>
+                                    </div>
+                                </div>
+                                <table class="col-xs-12 np_pad" role="presentation"><tbody class="files"></tbody></table>
+                            </div>
+                            
+                            <h8 class="bottom col-xs-12 top">Register file</h8>
+                            <div class="col-xs-12 left_d">
+                                <div class="left_text col-xs-3 min_top">
+                                    {{register_file_name.name.label}}
+                                </div>
+                                <div class="left_text col-xs-5 min_top">
+                                    {{register_file_name.name}}
+                                </div>
+                                <div class="col-xs-3 bottom">
+                                    <button class="left_d btn btn-primary btn-md min_top" type="submit" name="registerfile">Register</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="vert_content" style="display:none" id="nav_delete">
+                            <h8>Are you sure you want to remove these files?</h8>
+                            <div class="col-xs-12">
+                                <button class="btn_center btn btn-primary btn-md top" type="submit" name="deletefile">Yes</button>
+                            </div>
+                        </div>
+                        <div class="vert_content" style="display:none" id="nav_add_pro">
+                            <h8>Choose projects you want to add these files to</h8>
+                            <select class="top select_long col-xs-12" multiple name="project_name">
+                                {% for project_f in project_files %}
+                                    {% if project_f.name != project.name %}
+                                        <option value="{{ project_f.id }}">{{ project_f.name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            <div class="col-xs-12">
+                                <button class="btn_center btn btn-primary btn-md top" type="submit" name="add">Add</button>
+                            </div>
+                        </div>
+                        <!--<div class="vert_content" style="display:none" id="nav_add_ext">
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <p>{{ message }}</p>
+                                {% endfor %}
+                            {% endif %}
+                            {{ dict_formset.management_form }}
+                            {% for dict_form in dict_formset %}
+                                <div class="dict_formset">
+                                    {{ dict_form.key }}
+                                    {% if dict_form.key.errors %}
+                                        {% for error in dict_form.key.errors %}
+                                            {{ error|escape }}
+                                        {% endfor %}
+                                    {% endif %}
+                                    {{ dict_form.value }}
+                                    {% if dict_form.value.errors %}
+                                        {% for error in dict_form.value.errors %}
+                                            {{ error|escape }}
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            {% if dict_formset.non_form_errors %}
+                                {% for error in dict_formset.non_form_errors %}
+                                    {{ error|escape }}
+                                {% endfor %}
+                            {% endif %}
+                            <button type="submit" name = "add_ext" > Add extension</button>
+                        </div> -->
+                        <div class="vert_content" style="display:none" id="nav_add_com">
+                            <h8>Add comment to files</h8>
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <p>{{ message }}</p>
+                                {% endfor %}
+                            {% endif %}
+                            {{ comment_formset.management_form }}
+                            {% for comment_form in comment_formset %}
+                                <div class="comment_formset">
+                                    <div class="col-sx-12 top">
+                                        {{ comment_form.comment }}
+                                        {% if comment_form.comment.errors %}
+                                            {% for error in comment_form.comment.errors %}
+                                                {{ error|escape }}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-sx-12">
+                                        Do you want to show this comment to others?
+                                        {{ comment_form.show }}
+                                        {% if comment_form.show.errors %}
+                                            {% for error in comment_form.show.errors %}
+                                                {{ error|escape }}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            {% if comment_formset.non_form_errors %}
+                                {% for error in comment_formset.non_form_errors %}
+                                    {{ error|escape }}
+                                {% endfor %}
+                            {% endif %}
+                            <div class="bottom">
+                                <button class="btn btn-primary btn-md top" type="submit" name = "add_comment_file"> Add comment </button>
+                            </div>
+                        </div>
+                        <!--<div class="vert_content" style="display:none" id="nav_add_gr">
+                            <h8 class="col-xs-12">Choose groups you want to add these files to</h8>
+                            <select class="top col-xs-12" multiple name="group_name">
+                                {% for group_file in groups %}
+                                    <option value="{{ group_file.name }}">{{ group_file.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="col-xs-12">
+                                <button class="btn_center btn btn-primary btn-md top" type="submit" name="add_group">Add</button>
+                            </div>
+                            <h8 class="bottom col-xs-12 top">Or add these files to a new group</h8>
+                            <div class="col-xs-12">
+                                <div class="left_text col-xs-3 min_top">
+                                    {{new_group.name.label}}
+                                </div>
+                                <div class="left_text col-xs-3 min_top">
+                                    {{new_group.name}}
+                                </div>
+                            </div>
+                            <div class="col-xs-12">
+                                <div class="left_text col-xs-3 min_top">
+                                    Description:
+                                </div>
+                                <div class="left_text col-xs-3 min_top">
+                                    {{new_group_desc.comment}}
+                                </div>
+                            </div>
+                            <div class="bottom col-xs-12">
+                            <button class="btn_center btn btn-primary btn-md top" type="submit" name = "add_new_group">Add</button>
+                            </div>
+                        </div> -->
+                        <div class="vert_content left" style="display:none" id="nav_share">
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <p>{{ message }}</p>
+                                {% endfor %}
+                            {% endif %}
+                            {{ share_formset.management_form }}
+                            {% for share_form in share_formset %}
+                                <div class="share_form">
+                                    <td>1. choose person</td>
+                                    <div class="left top bottom">
+                                        {{ share_form.user }}
+                                    </div>
+                                    {% if share_form.user.errors %}
+                                        {% for error in share_form.user.errors %}
+                                            {{ error|escape }}
+                                        {% endfor %}
+                                    {% endif %}
+                                    <td>2. add comment (optional)</td>
+                                    <div class="left top bottom">
+                                    {{ share_form.comment }}
+                                    </div>
+                                    {% if share_form.comment.errors %}
+                                        {% for error in share_form.comment.errors %}
+                                            {{ error|escape }}
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            {% if share_formset.non_form_errors %}
+                                {% for error in share_formset.non_form_errors %}
+                                    {{ error|escape }}
+                                {% endfor %}
+                            {% endif %}
+                            <div class = "btn_center">
+                                <button class="btn btn-primary btn-md top bottom" type="submit" name = "share_files">Share</button>                            
+                            </div>
+                        </div>
+                    </div>
+                </form>
+             </div>
+        </div>
+    </div>
+</div>
+
+<!--
+    GROUP
+    
+<div class="content" id="Group">
+    <div class="panel-group" id="accordion">
+        <form method="POST" enctype="multipart/form-data">{% csrf_token %}
+            {% for group in show_groups %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse"  data-parent="#accordion" href="#collapse{{ group.id }}">
+                            {{ group.name }}</a>
+                            
+                            <input type="checkbox" value="{{ group.id }}" name="group_choices">
+                            <a href="/app/show_group/{{ group.id }}"> details </a>
+                        </h4>
+                    </div>
+                    <div id="collapse{{ group.id }}" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            creator: {% get_creator group %}
+                            <br></br>
+                            files: {% get_files group %}
+                            <br></br>
+                            analysts who can use it: {% get_group_analysts group %}
+                      </div>
+                    </div>
+                </div>
+            {% endfor %}
+            <button type="submit" name="deletegroup">Delete</button>
+        </form>
+         </div>
+</div>-->
+<style>
+/* Adjust the jQuery UI widget font-size: */
+.ui-widget {
+    font-size: 0.95em;
+}
+.preview img {
+    max-height:50px;
+}
+</style>
+<!-- jQuery UI styles -->
+<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/dark-hive/jquery-ui.css" id="theme">
+<link rel="stylesheet" href="{% static 'css/jquery.fileupload-ui.css' %}">
+<noscript><link rel="stylesheet" href="{% static 'css/jquery.fileupload-ui-noscript.css'%}"></noscript>
+{% verbatim %}
+<!-- The template to display files available for upload -->
+<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade" style="display:none">
+        <td>
+            <span class="preview"></span>
+        </td>
+        <td>
+            <p class="name">{%=file.name%}</p>
+            {% if (file.error) { %}
+                <div><span class="error">Error:</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <p class="size">{%=o.formatFileSize(file.size)%}</p>
+            {% if (!o.files.error) { %}
+                <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+            {% } %}
+        </td>
+        <td>
+            {% if (!o.files.error && !i && !o.options.autoUpload) { %}
+                <button class="btn-down start"> <i class="glyphicon glyphicon-upload"></i> Start</button>
+            {% } %}
+            {% if (!i) { %}
+                <button class="cancel btn-down"> <i class="glyphicon glyphicon-remove"></i> Cancel</button>
+            {% } %}
+        </td>
+    </tr>
+{% } %}
+</script>
+<!-- The template to display files available for download -->
+<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade" style="display:none">
+        <td>
+            <p class="name">
+                <a title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+            </p>
+            {% if (file.error) { %}
+                <div><span class="error">Error</span> {%=file.error%}</div>
+            {% } %}
+        </td>
+        <td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+        </td>
+        <td>
+                <p class="left"> File sent with success</p>
+        </td>
+    </tr>
+{% } %}
+</script>
+{% endverbatim %}
+<script src="{% static 'bootstrap/js/jquery.formset.js' %}"></script>
+<script>
+    $('.link_formset').formset({
+        addText: 'add another',
+        deleteText: 'remove link',
+        prefix: '{{ link_formset.prefix }}',
+        formCssClass: 'dynamic-formset1',
+    });
+    $('.dict_formset').formset({
+        addText: 'add link',
+        deleteText: 'remove link',
+        prefix: '{{ dict_formset.prefix }}',
+        formCssClass: 'dynamic-formset2',
+    });
+    $('.share_form').formset({
+        addText: 'add another',
+        deleteText: 'remove link',
+        prefix: '{{ share_formset.prefix }}',
+        formCssClass: 'dynamic-formset3',
+    });
+    $('.comment_formset').formset({
+        addText: '',
+        deleteText: 'remove link',
+        prefix: '{{ comment_formset.prefix }}',
+        formCssClass: 'dynamic-formset4',
+    });
+</script>
+
+</script>
+<!-- The Templates plugin is included to render the upload/download listings -->
+<script src="{% static 'js/tmpl.min.js' %}"></script>
+<!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+<script src="{% static 'js/load-image.min.js' %}"></script>
+<!-- The Canvas to Blob plugin is included for image resizing functionality -->
+<script src="{% static 'js/canvas-to-blob.min.js' %}"></script>
+<!-- blueimp Gallery script -->
+<script src="{% static 'js/jquery.blueimp-gallery.min.js' %}"></script>
+<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+<script src="{% static 'js/jquery.iframe-transport.js' %}"></script>
+<!-- The basic File Upload plugin -->
+<script src="{% static 'js/jquery.fileupload.js' %}"></script>
+<!-- The File Upload processing plugin -->
+<script src="{% static 'js/jquery.fileupload-process.js' %}"></script>
+<!-- The File Upload image preview & resize plugin -->
+<script src="{% static 'js/jquery.fileupload-image.js' %}"></script>
+<!-- The File Upload audio preview plugin -->
+<script src="{% static 'js/jquery.fileupload-audio.js' %}"></script>
+<!-- The File Upload video preview plugin -->
+<script src="{% static 'js/jquery.fileupload-video.js' %}"></script>
+<!-- The File Upload validation plugin -->
+<script src="{% static 'js/jquery.fileupload-validate.js' %}"></script>
+<!-- The File Upload user interface plugin -->
+<script src="{% static 'js/jquery.fileupload-ui.js' %}"></script>
+<!-- The File Upload jQuery UI plugin -->
+<script src="{% static 'js/jquery.fileupload-jquery-ui.js' %}"></script>
+<!-- The main application script -->
+<script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/csrf.js' %}"></script>
+<!-- The XDomainRequest Transport is included for cross-domain file deletion for IE 8 and IE 9 -->
+<!--[if (gte IE 8)&(lt IE 10)]>
+<script src="js/cors/jquery.xdr-transport.js"></script>
+<![endif]-->
+{% endblock %}

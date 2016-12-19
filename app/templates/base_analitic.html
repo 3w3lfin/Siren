@@ -1,0 +1,144 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <title>Siren</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/css/bootstrap.min.css' %}" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="http://fonts.googleapis.com/css?family=Lobster+Two" rel="stylesheet" type="text/css">
+    <script src="{% static 'js/jquery-sortable.js' %}"></script>
+    <script src="{% static 'js/siren.js' %}"></script>
+    <script type = "text/javascript" src="{% static 'js/jquery.custom-animations.js' %}"></script>
+</head>
+<body id = "back" background = "{% static 'login4.png' %}">
+    <nav class="navbar navbar-inverse affix"  data-offset-top="17">
+    <div class="container-fluid">
+        <div class="navbar-header">
+          
+            <a class="navbar-brand" href="{% url 'index' %}">Siren</a>
+        </div>
+        <div>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="{% url 'my site' %}"><span class="glyphicon glyphicon-user"></span> {{ user }} </a></li>
+                {% if user.is_anonymous %}
+                    <li><a href="{% url 'django.contrib.auth.views.login' %}">
+                        <span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                {% else %}
+                    <li><a href="{% url 'django.contrib.auth.views.logout' %}?next=/app/log_out">
+                        <span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+<div id="menu" class="col-xs-3 nav nav-pills nav-stacked" >
+    <div class="well_menu" style="width:200px; ">
+        <div class="menu_con">
+            <li><label class="tree-toggler nav-header hov"> NEW </label>
+                <ul class="nav nav-list tree">
+                    <li><label class="tree-toggler nav-header hov tab"> <a style="text-decoration: none; color : #9D9D9D;" href="/app/new_project">project</a> </label></li>
+                </ul>
+                <ul class="nav nav-list tree">
+                    <li><label class="tree-toggler nav-header hov tab"> <a style="text-decoration: none; color : #9D9D9D;" href="/app/new_service">service</a> </label></li>
+                </ul>
+            </li>
+            
+            <li><label class="tree-toggler nav-header hov"> PROJECT </label>
+                <ul class="nav nav-list tree">
+                    <li><label class="tree-toggler nav-header hov tab"> my </label>
+                        <ul class="nav nav-list tree">
+                            {% for entry in my_projects %}
+                                <li class = "show hov dtab"><p><a style="text-decoration: none; color : #9D9D9D;" href="/app/show_project/{{ entry.id }}">{{ entry.name }}</a></p></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li><label class="tree-toggler nav-header hov tab"> other</label>
+                        <ul class="nav nav-list tree">
+                            {% for entry_else in else_projects %}
+                                <li class = "show hov dtab"><p><a style="text-decoration: none; color : #9D9D9D;" href="/app/show_project/{{ entry_else.id }}">{{ entry_else.name }}</a></p></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            
+            <li><label class="tree-toggler nav-header">SERVICES</label>
+                <ul class="nav nav-list tree">
+                    <li><label class="tree-toggler nav-header hov tab"> my </label>
+                        <ul class="nav nav-list tree">
+                            {% for my_ser in services %}
+                                <li class = "show hov dtab"><p><a style="text-decoration: none; color : #9D9D9D;" href="/app/show_service/{{ my_ser.id }}">{{ my_ser.name }}</a></p></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li><label class="tree-toggler nav-header hov tab"> other</label>
+                        <ul class="nav nav-list tree">
+                            {% for else_ser in else_services %}
+                                <li class = "show hov dtab"><p><a style="text-decoration: none; color : #9D9D9D;" href="/app/show_service/{{ else_ser.id }}">{{ else_ser.name }}</a></p></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li><label class="tree-toggler nav-header">FILE</label>
+                <ul class="nav nav-list tree">
+                    <li><label class="tree-toggler nav-header hov tab"> my </label>
+                        <ul class="nav nav-list tree">
+                            {% for my_f in my_file %}
+                                <li class = "show hov dtab"><p><a style="text-decoration: none; color : #9D9D9D;" href="/app/show_file/{{ my_f.id }}">{{ my_f.ad_name }}</a></p></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li><label class="tree-toggler nav-header hov tab"> other</label>
+                        <ul class="nav nav-list tree">
+                            {% for else_f in else_file %}
+                                <li class = "show hov dtab"><p><a style="text-decoration: none; color : #9D9D9D;" href="/app/show_file/{{ else_f.id }}">{{ else_f.ad_name }}</a></p></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li><label class="tree-toggler nav-header">ARCHIVE</label>
+                <ul class="nav nav-list tree">
+                    <li><label class="tree-toggler nav-header hov tab"> projects </label>
+                        <ul class="nav nav-list tree">
+                            {% for old in pro_archive %}
+                                <li class = "show hov dtab"><p><a style="text-decoration: none; color : #9D9D9D;" href="/app/archive/project/{{ old.id }}">{{ old.name }}</a></p></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li><label class="tree-toggler nav-header hov tab"> files </label>
+                        <ul class="nav nav-list tree">
+                            {% for old_file in file_archive %}
+                                <li class = "show hov dtab"><p><a style="text-decoration: none; color : #9D9D9D;" href="/app/archive/file/{{ old_file.id }}">{{ old_file.ad_name }}</a></p></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li><label class="tree-toggler nav-header hov tab"> services </label>
+                        <ul class="nav nav-list tree">
+                            {% for old_ser in ser_archive %}
+                                <li class = "show hov dtab"><p><a style="text-decoration: none; color : #9D9D9D;" href="/app/archive/service/{{ old_ser.id }}">{{ old_ser.name }}</a></p></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <div class="pit"></div>
+        </div>
+    </div>
+</div>
+<div class="col-xs-3" id = "nop"></div>
+<div id="blindLeftToggle" class="col-xs-1 nav nav-pills nav-stacked menu_open">
+    <div id="over">
+        <span class="Centerer"></span>
+        <img class="Centered" src = "{% static 'logo9.png' %}" />
+    </div>
+</div>
+    {% block content %}
+    {% endblock %}
+</body>s

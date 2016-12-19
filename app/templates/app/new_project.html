@@ -1,0 +1,143 @@
+{% extends "base_analitic.html" %}
+{% block content %}
+{% load staticfiles %}
+<script>
+    $(document).ready(function () {    
+        toggleTarget("New");
+    });
+
+    function toggle(source) {
+        checkboxes = document.getElementsByName('stay');
+        if (checkboxes[0].checked) {
+            var t = false;
+        } else {
+            var t = true;
+        }
+        for(var i=0, n=checkboxes.length; i<n; i++) {
+            checkboxes[i].checked = t;
+        }
+    }
+</script>
+
+<div id = "out" class="col-xs-9">
+    <div id ="in">
+        <p class = "lobster_two"> Create project </p>
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+                <div>
+                    <ul class="nav navbar-nav col-xs-12 down" data="New">
+                        <li class="dropdown div_down">
+                            <a class="dropdown-toggle" data-toggle="dropdown"></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="content" id="New">
+            <div class="well_e">
+                <p> create new project</p>
+            </div>
+            <div class="col-xs-12 no_pad left bottom">
+                <form enctype="multipart/form-data" method="post">
+                    {% csrf_token %}
+                    <div class="col-xs-10">
+                        {{ form.name.label }}
+                        {{ form.name }}
+                        <input type="submit" class="btn btn-primary btn-md btn_r" name = "new" value="Submit" />
+                    </div>
+                    <div class="col-xs-10">
+                        {% if form.name.errors %}
+                            {% for error in form.name.errors %}
+                                <div class = "alert alert-danger fade in top">{{ error|escape }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+            <div class="col-xs-12 no_pad well_e"> create project based on existing one </div>
+            <div class = "left">
+                <form enctype="multipart/form-data" method="post">
+                    {% csrf_token %}
+                    <div class="col-xs-12">
+                        {{ form.name.label }}
+                        {{ form.name }}
+                        <input type="submit" class="btn btn-primary btn-md btn_r" name = "new" value="Submit" />
+                        <label class = "btn_r">Based on:</label>
+                        <select name="project_id">
+                            {% for project in projects %}
+                                <option value="{{ project.id }}">{{ project.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-xs-12">
+                        {% if form.name.errors %}
+                            {% for error in form.name.errors %}
+                                <div class = "alert alert-danger fade in top">{{ error|escape }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-xs-12 top">
+                        <label>Choose attributes you want to build your new project on:</label> 
+                        <a onclick="toggle(this)">check all</a>
+                    </div>
+                    <div class="col-xs-12 table-responsive"> 
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td> plan:<input type="checkbox" class="check" name="stay" value="plan"></td>
+                                    <td> comments: <input type="checkbox" class="check" name="stay" value="comments"></td>
+                                </tr>
+                                <tr>
+                                    <td> files:  <input type="checkbox" class = "check" name="stay" value="fileIn"><br><br><br><br></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td> PERMITS AND ROLES </td>
+                                </tr>
+                                <!---
+                                <tr>
+                                    <td> analysts with write access:  <input type="checkbox" class = "check" name="stay" value="analysts_write"></td>
+                                    <td> analysts with read-only access:  <input type="checkbox" class = "check" name="stay" value="analysts_read"></td>
+                                </tr>
+                                -->
+                                <tr>
+                                    <td> analysts:  <input type="checkbox" class = "check" name="stay" value="analysts_write"></td>
+                                    <td> boss: <input type="checkbox" class = "check" name="stay" value="boss"></td>
+                                </tr>
+                                <tr>
+                                    <td> customers: <input type="checkbox" class = "check" name="stay" value="client"><br><br><br><br></td>
+                                    <td></td>
+                                </tr>
+                                <!---
+                                <tr>
+                                    <td> FILES </td>
+                                </tr>
+                                <tr>
+                                    <td> input files:  <input type="checkbox" class = "check" name="stay" value="fileIn"></td>
+                                    <td> output files: <input type="checkbox" class = "check" name="stay" value="fileOut"></td>
+                                </tr>
+                                <tr>
+                                    <td> groups of files: <input type="checkbox" class = "check" name="stay" value="group"><br><br><br><br><br><td></td>
+                                </tr>
+                                -->
+                                <tr>
+                                    <td> ANALYSES </td>
+                                </tr>
+                                <tr>
+                                    <td> services:  <input type="checkbox" class = "check" name="stay" value="Service"></td>
+                                    <td> modules: <input type="checkbox" class = "check" name="stay" value="Module"></br></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class = "btn_center">
+                        <input class="btn btn-primary btn-md" type="submit" name = "not_new" value="Submit" />
+                    </div>
+                    <br></br>
+                </form>
+            </div> 
+        </div>
+    </div>
+</div>
+{% endblock %}

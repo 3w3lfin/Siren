@@ -1,0 +1,22 @@
+{% extends "base_analitic.html" %}
+
+{% block content %}
+
+<p> {{ project.name }} </p>
+
+<form enctype="multipart/form-data" method="post">
+    {% csrf_token %}
+    <select name="file">
+    {% for file in project.file_set.all %}
+        <option value="{{ file.number }}">{{ file.number }}</option>
+    {% endfor %}
+    </select>
+    <select name="program">
+    {% for program in programs %}
+        <option value="{{ program.name }}">{{ program.name }}</option>
+    {% endfor %}
+    </select>
+        <input type="submit" value="Submit" />
+</form>
+
+{% endblock %}

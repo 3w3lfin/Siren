@@ -1,0 +1,124 @@
+{% load staticfiles %}
+{% csrf_token %}
+{% load upload_tags %}
+{% static "" as baseUrl %}
+<meta charset="utf-8"/>
+<!-- ABOUT -->
+
+<div class="content" id="About">
+    <div class = "left top">
+    <noscript><input type="hidden" name="is_pending" value='{{pending}}'></noscript>
+        {% if pending %}
+            <div class="col-xs-6 top bottom" >
+                <h8> Program still running, please wait... </h8>
+            </div>
+        {% else %}
+            <div class="table-responsive"> 
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td> module name:  </td> <td>{{ analysis.module.name }}</td>
+                            <td></td><td></td>
+                        </tr>
+                        <tr>
+                            <td> created: </td><td> {{ analysis.start_date }} </td>
+                            <td> ended: </td><td> {{ analysis.end_date }} </td>
+                        </tr>
+                        <tr>
+                            <td> <div class="top">STATISTICS: </div></td>
+                        </tr>
+                        <tr>
+                            <td> number of output files: </td><td> {{ n_out }} </td>
+                        </tr>
+                        <tr>
+                            <td> number of log files: </td><td> {{ n_log }} </td>
+                        </tr>
+                        <tr>
+                            <td> number of configure files: </td><td> {{ n_conf }} </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+<!-- LOG -->
+<div class="content" id="Log">
+    <div class = "left top">
+        {% for log in file_log %}
+            <div class="col-xs-12 bottom">
+                <div class="col-xs-2 cen"> 
+                     <a class="download" href="/{{ log.path }}"> {{log.ad_name}} </a>
+                    <iframe content="text/html;charset=UTF-8" id="iframe_down_{{log.id}}" style="display:none;"></iframe>
+                </div>
+                <div class="col-xs-8 well_d">
+                    {{log.display_text_file|linebreaks}}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+<!-- CONF -->
+<div class="content" id="Conf">
+    <div class = "left top">
+        {% for conf in file_conf %}
+            <div class="col-xs-12 bottom">
+                <div class="col-xs-2 cen"> 
+                     <a class="download" href="/{{ conf.path }}"> {{conf.ad_name}} </a>
+                    <iframe content="text/html;charset=UTF-8" id="iframe_down_{{conf.id}}" style="display:none;"></iframe>
+                </div>
+                <div class="col-xs-8 well_d">
+                    {{conf.display_text_file|linebreaks}}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+<!-- OUTPUT -->
+<div class="content" id="Output">
+    <div class = "top">
+        {% for out in file_out %}
+            <div class="col-xs-12 bottom">
+                <div class="col-xs-10 left"> 
+                    <a class="download" href="/{{ out.path }}"> {{out.ad_name}} </a>
+                    <iframe id="iframe_down_{{out.id}}" style="display:none;"></iframe>
+                </div>
+                <div class="col-xs-12 top">
+                    {% if out.ext == ".png" or out.ext == ".jpg" %}
+                        <img src="/{{out.path}}" id="path" alt=""/> 
+                    {% elif out.ext == ".pdf" %}
+                        <object id="data" height="950" data="/{{out.path}}" type="application/pdf" width="800">
+                            <p>It appears you don't have a PDF plugin for this browser.</p>
+                        </object>
+                        
+                    {% else %}
+                        {{out.display_text_file|linebreaks}}
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+  
+    $(document).ready(function () {   
+        $('#out').slideDown("slow");
+
+        var target = $("#About");
+        target.slideToggle(500).toggleClass("active");
+    });
+        
+        
+    $('.download').click(function () {
+        var path = $(this).attr("data-path");
+        var id = $(this).attr("data-catid");
+        path = path.substring(path.indexOf('/')+1);
+        path = path.substring(path.indexOf('/')+1);
+        path = "{{ baseUrl }}" + path;
+        document.getElementById('iframe_down_' + id).src = path;
+
+    });
+        
+        
+</script>

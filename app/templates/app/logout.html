@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+{% load staticfiles %}
+    <link href='http://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+    <script type = "text/javascript" src="{% static 'bootstrap/js/prototype.js' %}"></script>
+    <script type = "text/javascript" src="{% static 'bootstrap/js/scriptaculous.js' %}"></script>
+
+    <body style="background:black">
+        <div class="col-xs-12" >
+            <div class="col-xs-3"></div>
+            <div class="col-xs-6" id="index_main">
+                <div id = "index_container">
+                    <div class="col-xs-12" >
+                        <img id = "index_img" src = "{% static 'logo8.png' %}"/>
+                    </div>
+                    <div id = "index_siren">
+                        <h15> siren </h15>
+                        <br>
+                    </div>
+                </div>
+                <div id="index_text">
+                    <h12> enjoy the science </h12>
+                    <br>
+                    <div class="col-xs-12" id="index_text2">
+                        <br>
+                        <h10> <a href = "/app/login" style = "color: #21eff2"> log again </a> </h10>
+                    </div>
+                </div>
+                <div class="col-xs-2">
+                </div>
+            </div>
+            <br>
+        </div>
+
+    </body>
+{% endblock %}

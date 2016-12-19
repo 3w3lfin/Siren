@@ -1,0 +1,432 @@
+{% extends "base_analitic.html" %}
+
+{% block content %}
+{% load staticfiles %}
+{% static "" as baseUrl %}
+<link href="http://fonts.googleapis.com/css?family=Lobster+Two" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/dark-hive/jquery-ui.css" id="theme">
+<!-- blueimp Gallery styles -->
+<link rel="stylesheet" href="{% static 'css/blueimp-gallery.min.css' %}">
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<link rel="stylesheet" href="{% static 'css/jquery.fileupload-ui.css' %}">
+<!-- CSS adjustments for browsers with JavaScript disabled -->
+<noscript><link rel="stylesheet" href="{% static 'css/jquery.fileupload-ui-noscript.css' %}"></noscript>
+<script type = "text/javascript" src="{% static 'bootstrap/js/dropzone.js' %}"></script>
+
+<script>
+    
+    
+    $(document).ready(function () {    
+        $('.show').click(function(){  
+            var tmp1 = "/app/show_project/";
+            var tmp2 = $(this).text();
+            var loc = tmp1 + tmp2;  
+            location.href = loc;
+        });  
+  
+        $('#out').slideDown("slow");
+        
+                
+        $(".down").click(function(){
+                var target = $("#" + $(this).text());
+                $(".content").not(target).slideUp("slow");
+                target.slideToggle("slow").toggleClass("active");
+                $('.down').not(this).removeClass('active');
+                return false;
+            }); 
+         });
+            
+
+            
+    
+    
+</script>
+
+<div id = "out"class="col-xs-8">
+    <div id = "in">
+        <p class = "lobster_two"> Hello {{ user.get_name }}! </p>
+        <br></br>
+        <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+                <div>
+                    <ul class="nav navbar-nav">
+                        <li class="dropdown">
+                            <a class="dropdown-toggle down" data-toggle="dropdown">About</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav">
+                <li class="dropdown">
+                    <a class="dropdown-toggle down" data-toggle="dropdown">Share</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav">
+                <li class="dropdown">
+                    <a class="dropdown-toggle down" data-toggle="dropdown">Files</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav">
+                <li class="dropdown">
+                    <a class="dropdown-toggle down" data-toggle="dropdown">Comments</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav">
+                <li class="dropdown">
+                    <a class="dropdown-toggle down" data-toggle="dropdown">Ext</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav">
+                <li class="dropdown">
+                    <a class="dropdown-toggle down" data-toggle="dropdown">Update</a>
+                </li>
+            </ul>
+           
+        </div>
+    </div>
+</nav>
+
+<div class="content" id="About">
+
+                    <td> group name: {{ group.name }} </td>
+                    <td> added by: {{ creator }} {{ group.date }}</td>
+                    <td> description: {{ description.comment }}</td>
+
+</div>
+
+<div class="content" id="Update">
+    <p>update group description</p>
+        <form enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        {{new_desc}}
+
+        <input type="submit" name = "update_desc" value="Submit" />
+        <br></br><br></br><br></br>
+
+    </form>
+</div>
+
+<div class="content" id="Comments">
+    <p>Comments</p>
+    {% for com in comments %}
+            <div id = "div_{{com.id}}" class= "add_comm" data-catid="{{com.id}}"><li class="file"  >{{ com.comment }} </li>
+            <div >
+                {% if com.show %}
+                    <button type="show_button" id = "hide" data-catid="{{com.id}}" class="btn btn-info btn-lg show_button">Hide from others</button> 
+                {% else %}
+                    <button type="show_button" id = "show" data-catid="{{com.id}}" class="btn btn-info btn-lg show_button">Show to others</button> 
+                {% endif %}
+                <button type="button" data-catid="{{com.id}}" class="btn btn-info btn-lg removeButton">Remove</button> 
+            </div>
+            </div>
+            
+    {% endfor %}
+    
+            <form enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+
+           {{new_comment}}
+        <input type="submit" name = "add_comment" value="Submit" />
+        </form>
+        <br></br><br></br><br></br>
+
+</div>
+
+
+<div class="content" id="Ext">
+    <p>This file key-value:</p>
+
+        <tr>
+            <td>key</td>
+            <td>value</td>
+            <td>added_by</td>
+            <td>date</td>
+        </tr>
+        {% for ext in exts %}
+        <br></br>
+        <tr>
+          <td>{{ext.key}}</td>
+          <td>{{ext.value}}</td>
+          <td>{{ext.user}}</td>
+          <td>{{ext.date}}</td>
+          <a class="remove" id = "ext" data-catid = "{{ext.id}}">remove</a>
+        </tr>
+        {% endfor %}
+         <br></br><br></br>
+                <form enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+
+           {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+
+     {{ ext_formset.management_form }}
+      
+
+        {% for ext_form in ext_formset %}
+            <div class="ext_formset">
+                {{ ext_form.key }}
+                {% if ext_form.key.errors %}
+                    {% for error in ext_form.key.errors %}
+                        {{ error|escape }}
+                    {% endfor %}
+                {% endif %}
+
+                {{ ext_form.value }}
+                {% if ext_form.value.errors %}
+                    {% for error in ext_form.value.errors %}
+                        {{ error|escape }}
+                    {% endfor %}
+                {% endif %}
+                
+            </div>
+        {% endfor %}
+
+        {% if ext_formset.non_form_errors %}
+            {% for error in ext_formset.non_form_errors %}
+                {{ error|escape }}
+            {% endfor %}
+        {% endif %}
+        <input type="submit" name = "add_ext" value="Submit" />
+       </form>
+
+</div>
+
+
+<div class="content" id="Share"><p>share this group</p>
+    <div class="col-xs-4">
+        <p>people who can use this group</p>
+        <br></br>
+        <p>analysts:</p>
+        
+        {{creator}}
+        {% for entry in can_use %}
+            <li id = "{{entry.id}}" class="group">{{ entry.username }}
+            <a class="remove" data-catid = "{{entry.id}}">remove</a></li>
+        {% endfor %}        
+        <br></br>
+       
+
+    </div>
+
+    <div class="col-xs-4">
+        <p>share this project</p>
+    <form enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        {% load staticfiles %}
+
+         <table id="id_share_group_table" border="0" cellpadding="0" cellspacing="5">
+
+                <thead>
+                    <tr>
+                        <th scope="col">user</th>
+                        <th scope="col">comment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for link_form_group in link_formset_group.forms %}
+                    <tr id="{{ link_form_group.prefix }}-row" class="form-container">
+                        <td style="text-align:center;">{{ link_form_group.user }}</td>
+                        <td>{{ link_form_group.comment }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            
+            <p>
+                {{ link_formset_group.management_form }}
+                <input type="submit" name = "share" value="Submit" />
+            </p>
+        </form>
+    </div>
+
+         
+   </div>
+   
+<div class="content" id="Files">
+
+    <div class="panel-group" id="accordion">
+        <form method="POST" enctype="multipart/form-data">{% csrf_token %}
+        
+            {% for file in files %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse"  data-parent="#accordion" href="#collapse{{ file.id }}">
+                            {{ file.user_name }}{{ file.ext }} </a>
+                            
+                            <input type="checkbox" value="{{ file.id }}" name="choices">
+                            <a href="/app/show_file/{{ file.id }}"> details </a>
+                        </h4>
+                    </div>
+                    <div id="collapse{{ file.id }}" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            client's name: {{file.slug}}
+                            analyst's name: {{ file.user_name }}
+                            
+                            sended by: {{ file.date }}
+                            
+                            analysts who can use it: 
+                      </div>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <button type="submit" name="deletefile">Delete</button>
+            
+            <br></br>
+            
+           
+                     {% csrf_token %}
+
+           {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+
+     {{ ext_file_formset.management_form }}
+      
+
+        {% for ext_file_form in ext_file_formset %}
+            <div class="ext_file_formset">
+                {{ ext_file_form.key }}
+                {% if ext_file_form.key.errors %}
+                    {% for error in ext_file_form.key.errors %}
+                        {{ error|escape }}
+                    {% endfor %}
+                {% endif %}
+
+                {{ ext_file_form.value }}
+                {% if ext_file_form.value.errors %}
+                    {% for error in ext_file_form.value.errors %}
+                        {{ error|escape }}
+                    {% endfor %}
+                {% endif %}
+                
+            </div>
+        {% endfor %}
+
+        {% if ext_file_formset.non_form_errors %}
+            {% for error in ext_file_formset.non_form_errors %}
+                {{ error|escape }}
+            {% endfor %}
+        {% endif %}
+        <input type="submit" name = "add_ext_files" value="Submit" />
+       </form>
+         </div>
+        
+            
+
+        
+</div>
+  
+<!-- Modal -->
+<div id=".pdf" class="modal fade pdf" role="dialog">
+  <div class="modal-dialog">
+      <div class="modal-body">
+        <object height="950" data="{% static 'pdf.pdf' %}" type="application/pdf" width="860">
+            <p>It appears you don't have a PDF plugin for this browser.
+            No biggie... you can <a href="sample-report.pdf">click here to
+            download the PDF file.</a>
+            </p>
+        </object>
+    </div>
+  </div>
+</div>
+<div id="jpg" class="modal fade jpg png" role="dialog">
+  <div class="modal-dialog">
+      <div class="modal-body">
+             <img src="" id="path" alt=""> 
+
+    </div>
+  </div>
+</div>
+
+<div class="content" id="Projects">
+    <p>This group belongs to projects:</p>
+    {% for project in projects %}
+        {{ project.name }} <a class="remove" id = "project" data-catid = "{{project.name}}">remove</a>
+    {% endfor %}
+    
+    <form enctype="multipart/form-data" method="post">
+    {% csrf_token %}
+        <select name="project_name">
+        {% for project_f in project_files %}
+            <option value="{{ project_f.name }}">{{ project_f.name }}</option>
+        {% endfor %}
+        </select>
+        <input type="submit" name = "add_to_project" value="Submit" />
+</form>
+    
+</div>
+
+
+
+
+<script>
+$(document).ready(function(){
+    $('a[data-toggle=modal]').click(function () {
+
+        var path = $(this).attr("data-path");
+        path = path.substring(path.indexOf('/')+1);
+        path = path.substring(path.indexOf('/')+1);
+        path = "{{ baseUrl }}" + path;
+        $('#path').attr('src', path); 
+
+ 
+    });
+    $(".remove").click(function(){
+        var id = $(this).attr("data-catid");
+        if(!(this.id).localeCompare("ext")) {
+            $.get('/app/show_group/{{group.id}}', {command: "removeext", ext_id: id}, function(){});
+        } else if(!(this.id).localeCompare("project")) {
+            $.get('/app/show_group/{{group.id}}', {command: "removeproject", project_id: id}, function(){});
+        } else {
+            $.get('/app/show_group/{{group.id}}', {command: "remove", usergroup_id: id}, function(){});
+        }
+    });
+    
+    $(".show_button").click(function(){
+        var com_id = $(this).attr("data-catid");
+        $.get('/app/show_group/{{group.id}}', {command: this.id, com_id: com_id}, function(update_com){
+
+           });
+    });
+    
+    $(".removeButton").click(function(){
+        var id = $(this).attr("data-catid");
+        $.get('/app/show_group/{{group.id}}', {command: "removebutton", com_id: id}, function(){
+               $('#div_'+id).hide();
+           });
+    });
+    
+});
+</script>
+    <!-- Include formset plugin - including jQuery dependency -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="{% static 'bootstrap/js/jquery.formset.js' %}"></script>
+    <script>
+        $('#id_share_group_table tbody tr').formset({
+            addText: 'add link',
+            prefix: '{{ link_formset_group.prefix }}',
+            formCssClass: 'dynamic-formset-group',
+        });
+        
+        $('.ext_formset').formset({
+            addText: 'add link',
+            prefix: '{{ ext_formset.prefix }}',
+            formCssClass: 'dynamic-formset2',
+        });
+        $('.ext_file_formset').formset({
+            addText: 'add link',
+            prefix: '{{ ext_file_formset.prefix }}',
+            formCssClass: 'dynamic-formset3',
+        });
+    </script>
+
+{% endblock %}
+
